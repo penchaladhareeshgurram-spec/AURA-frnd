@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Georgia", serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+:root {
+  --color-bg: #0a0502;
+  --color-accent: #ff4e00;
+  --glass-surface: rgba(255, 80, 20, 0.15);
+  --glass-border: rgba(255, 200, 150, 0.1);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: #fff;
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.atmosphere {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 30%, #3a1510 0%, transparent 60%),
+    radial-gradient(circle at 10% 80%, var(--color-accent) 0%, transparent 50%);
+  filter: blur(60px);
+  opacity: 0.82;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.glass-panel {
+  background: var(--glass-surface);
+  backdrop-filter: blur(30px);
+  border: 1px solid var(--glass-border);
+}
+
+.lyric-content {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  line-height: 1.6;
+  color: rgba(224, 216, 208, 0.6);
+}
+
+.lyric-content.active {
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.scroll-mask {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+/* Custom scrollbar for webkit */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}

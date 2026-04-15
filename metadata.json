@@ -1,0 +1,6 @@
+{
+  "name": "Aura AI Companion",
+  "description": "A friendly AI chatbot with real-time voice chat capabilities.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": []
+}
