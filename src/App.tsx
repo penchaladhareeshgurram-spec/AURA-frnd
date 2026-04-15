@@ -75,11 +75,11 @@ export default function App() {
   const playTTS = async (text: string) => {
     try {
       setIsModelSpeaking(true);
-      const response = await ai.models.generateContent({
+      const stream = await ai.models.generateContentStream({
         model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text }] }],
         config: {
-          responseModalities: [Modality.AUDIO],
+          responseModalities: ["AUDIO"],
           speechConfig: {
             voiceConfig: {
               prebuiltVoiceConfig: { voiceName: selectedVoice },
@@ -87,11 +87,16 @@ export default function App() {
           },
         },
       });
-      const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      if (base64Audio) {
-        audioPlayerRef.current?.init();
-        audioPlayerRef.current?.play(base64Audio);
+      
+      audioPlayerRef.current?.init();
+      
+      for await (const chunk of stream) {
+        const base64Audio = chunk.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+        if (base64Audio) {
+          audioPlayerRef.current?.play(base64Audio);
+        }
       }
+      
       // We don't have a perfect way to know exactly when TTS finishes playing here without tracking the buffer duration,
       // but we can reset the speaking state after a rough estimate or just let it be.
       // For simplicity, we'll turn off the speaking indicator after 2 seconds.
