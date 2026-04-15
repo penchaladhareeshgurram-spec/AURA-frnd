@@ -7,7 +7,15 @@ import { auth, signInWithGoogle, logOut } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
 const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env.VITE_GEMINI_API_KEY;
-const ai = new GoogleGenAI({ apiKey });
+// Initialize lazily to prevent module-level crash if API key is missing on Vercel
+let ai: GoogleGenAI | null = null;
+try {
+  if (apiKey) {
+    ai = new GoogleGenAI({ apiKey });
+  }
+} catch (e) {
+  console.error("Failed to initialize Gemini API:", e);
+}
 
 type Message = {
   id: string;
@@ -40,6 +48,7 @@ export default function App() {
   const activeLiveMessageIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!ai) return;
     chatRef.current = ai.chats.create({
       model: "gemini-3-flash-preview",
       config: {
@@ -73,6 +82,10 @@ export default function App() {
   };
 
   const playTTS = async (text: string) => {
+    if (!ai) {
+      showError("API Key is missing. Please add VITE_GEMINI_API_KEY to your Vercel environment variables.");
+      return;
+    }
     try {
       setIsModelSpeaking(true);
       const stream = await ai.models.generateContentStream({
@@ -120,6 +133,11 @@ export default function App() {
   const handleSendText = async () => {
     if (!inputText.trim()) return;
     
+    if (!ai) {
+      showError("API Key is missing. Please add VITE_GEMINI_API_KEY to your Vercel environment variables.");
+      return;
+    }
+    
     if (!isVoiceActive && isModelSpeaking) {
       stopAudio();
     }
@@ -166,6 +184,10 @@ export default function App() {
   };
 
   const connectVoice = async () => {
+    if (!ai) {
+      showError("API Key is missing. Please add VITE_GEMINI_API_KEY to your Vercel environment variables.");
+      return;
+    }
     setIsConnecting(true);
     try {
       audioPlayerRef.current?.init();
