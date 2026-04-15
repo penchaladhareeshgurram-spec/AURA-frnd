@@ -176,7 +176,18 @@ export default function App() {
     }
     setIsConnecting(true);
     try {
+      // Initialize audio player context (requires user gesture)
       audioPlayerRef.current?.init();
+      
+      // Request microphone access FIRST before opening the WebSocket
+      // This ensures we catch permission errors immediately
+      await audioRecorderRef.current?.start((base64Data) => {
+        if (sessionRef.current) {
+          sessionRef.current.sendRealtimeInput({
+            audio: { data: base64Data, mimeType: 'audio/pcm;rate=16000' }
+          });
+        }
+      });
       
       const sessionPromise = ai.live.connect({
         model: "gemini-3.1-flash-live-preview",
@@ -184,13 +195,6 @@ export default function App() {
           onopen: () => {
             setIsConnecting(false);
             setIsVoiceActive(true);
-            audioRecorderRef.current?.start((base64Data) => {
-              sessionPromise.then(session => {
-                session.sendRealtimeInput({
-                  audio: { data: base64Data, mimeType: 'audio/pcm;rate=16000' }
-                });
-              });
-            });
           },
           onmessage: async (message: LiveServerMessage) => {
             // Log message to see transcription format if any

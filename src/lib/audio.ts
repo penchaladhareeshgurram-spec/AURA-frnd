@@ -66,6 +66,11 @@ export class AudioRecorder {
 
   async start(onData: (base64Data: string) => void) {
     this.onData = onData;
+    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error("Microphone API is not supported in this browser. Please ensure you are using a secure context (HTTPS) and a modern browser.");
+    }
+
     this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     this.context = new AudioContext({ sampleRate: 16000 });
     this.source = this.context.createMediaStreamSource(this.stream);
